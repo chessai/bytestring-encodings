@@ -3,7 +3,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
---{-# OPTIONS_GHC -O2 -Wall -Werror #-}
+{-# OPTIONS_GHC -O2 -Wall -Werror #-}
 
 module Data.ByteString.IsUtf8
   ( isAscii
@@ -16,10 +16,8 @@ import Data.Word (Word8, Word64)
 import GHC.Base
 import GHC.ForeignPtr (ForeignPtr(..))
 import GHC.Ptr
-import GHC.Num ( (+) )
 import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Storable (peek)
-import qualified Data.ByteString as B
 
 -- | 1000000010000000100000001000000010000000100000001000000010000000
 m64 :: Word64
@@ -65,45 +63,26 @@ alignPtrNeg addr@(Ptr a)
       0# -> addr
       n  -> Ptr (plusAddr# a (n -# 8#))
 
-fst :: (a,b,c,d,e,f) -> a
-fst    (a,_,_,_,_,_) = a
-
-snd :: (a,b,c,d,e,f) -> b
-snd    (_,b,_,_,_,_) = b
-
-trd :: (a,b,c,d,e,f) -> c
-trd    (_,_,c,_,_,_) = c
-
-frt :: (a,b,c,d,e,f) -> d
-frt    (_,_,_,d,_,_) = d
-
-fif :: (a,b,c,d,e,f) -> e
-fif    (_,_,_,_,e,_) = e
-
-sit :: (a,b,c,d,e,f) -> f
-sit    (_,_,_,_,_,f) = f
-
-split :: Ptr Word8 -> ByteString -> (Ptr Word8, Ptr Word8, Ptr Word64, Ptr Word64, Ptr Word8, Ptr Word8)
-split ptr (PS fp@(ForeignPtr addr _) (I# o#) (I# l#)) =
-  (startPre, endPre, startMid, endMid, startPost, endPost)
-    where
-      startPre  = Ptr (plusAddr# addr o#)
-      endPre    = alignPtrPos ptr
-      startMid  = endPre `plusPtr` 1
-      endMid    = startPost `plusPtr` (-1)
-      startPost = alignPtrNeg endPost
-      endPost   = Ptr (plusAddr# addr (o# +# l#))
-
 isAscii :: ByteString -> Bool
-isAscii   (PS _ _ 0)  = True
-isAscii b@(PS fp s k) =
+isAscii (PS _ _ 0)  = True
+isAscii (PS fp@(ForeignPtr addr _) (I# o#) (I# l#)) =
   accursedUnutterablePerformIO
     $ withForeignPtr fp
       $ \ptr ->
         do
-          let splitBoi = split ptr b
-          startIsAscii <- isAsciiPtrW8  (fst splitBoi) (snd splitBoi) 
+          let
+            startPre, endPre, startPost, endPost :: Ptr Word8
+            startMid, endMid :: Ptr Word64
+            
+            startPre  = Ptr (plusAddr# addr o#)
+            endPre    = alignPtrPos ptr
+            startMid  = endPre `plusPtr` 1
+            endMid    = startPost `plusPtr` (-1)
+            startPost = alignPtrNeg endPost
+            endPost   = Ptr (plusAddr# addr (o# +# l#))
+          
+          startIsAscii <- isAsciiPtrW8  (startPre) (endPre) 
           guard startIsAscii  
-          endIsAscii   <- isAsciiPtrW8  (fif splitBoi) (sit splitBoi) 
+          endIsAscii   <- isAsciiPtrW8  (startPost) (endPost) 
           guard endIsAscii 
-          isAsciiPtrW64 (trd splitBoi)  (frt splitBoi)
+          isAsciiPtrW64 (startMid)  (endMid)
