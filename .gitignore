@@ -3,3 +3,6 @@ dist*
 *.swp
 playground*
 result*
+*.hi
+*.o
+*.txt
