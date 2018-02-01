@@ -9,7 +9,6 @@ module Data.ByteString.IsUtf8
   ( isAscii
   ) where
 
-import Control.Monad (guard)
 import Data.Bits ( (.&.) )
 import Data.ByteString.Internal (ByteString(..), accursedUnutterablePerformIO)
 import Data.Word (Word8, Word64)
@@ -82,7 +81,9 @@ isAscii (PS fp@(ForeignPtr addr _) (I# o#) (I# l#)) =
             endPost   = Ptr (plusAddr# addr (o# +# l#))
           
           startIsAscii <- isAsciiPtrW8  (startPre) (endPre) 
-          guard startIsAscii  
-          endIsAscii   <- isAsciiPtrW8  (startPost) (endPost) 
-          guard endIsAscii 
-          isAsciiPtrW64 (startMid)  (endMid)
+          if (not startIsAscii) then pure False
+          else do
+            endIsAscii <- isAsciiPtrW8 (startPost) (endPost)
+            if (not endIsAscii) then pure False
+              else do
+                isAsciiPtrW64 (startMid)  (endMid)
