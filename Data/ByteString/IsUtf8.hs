@@ -21,11 +21,11 @@ import Foreign.Storable (peek)
 
 -- | 1000000010000000100000001000000010000000100000001000000010000000
 m64 :: Word64
-m64 = 9259542123273814144
+m64 = 0x8080808080808080
 
 -- | 10000000
 m8 :: Word8
-m8 = 128
+m8 = 0x80
 
 isAsciiPtrW64 :: Ptr Word64 -> Ptr Word64 -> IO Bool
 isAsciiPtrW64 !p !q
