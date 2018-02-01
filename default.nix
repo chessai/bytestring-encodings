@@ -1,4 +1,4 @@
-{ package ? "is-utf8-bytestring", compiler ? "ghc822" }:
+{ package ? "bytestring-encodings", compiler ? "ghc822" }:
 let
   fetchNixpkgs = import ./nix/fetchNixpkgs.nix;
   nixpkgs = fetchNixpkgs {
@@ -29,15 +29,15 @@ let
 
     {
       mkDerivation = args: super.mkDerivation (args // {
-        doBenchmark = pkgs.lib.elem args.pname [ "is-utf8-bytestring" ]; 
-        doCheck = pkgs.lib.elem args.pname [ "is-utf8-bytestring" ]; 
+        doBenchmark = pkgs.lib.elem args.pname [ "bytestring-encodings" ]; 
+        doCheck = pkgs.lib.elem args.pname [ "bytestring-encodings" ]; 
         doHaddock = false;
       });
       
-      is-utf8-bytestring = build "is-utf8-bytestring" ./.;
+      bytestring-encodings = build "bytestring-encodings" ./.;
     };
   };
 in rec {
   drv = overrides.${package};
-  is-utf8-bytestring = if pkgs.lib.inNixShell then drv.env else drv;
+  bytestring-encodings = if pkgs.lib.inNixShell then drv.env else drv;
 }
