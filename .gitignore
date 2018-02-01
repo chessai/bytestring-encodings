@@ -6,3 +6,5 @@ result*
 *.hi
 *.o
 *.txt
+stack.yaml
+.stack-work/
