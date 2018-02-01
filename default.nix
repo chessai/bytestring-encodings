@@ -29,6 +29,7 @@ let
 
     {
       mkDerivation = args: super.mkDerivation (args // {
+        doBenchmark = pkgs.lib.elem args.pname [ "is-utf8-bytestring" ]; 
         doCheck = pkgs.lib.elem args.pname [ "is-utf8-bytestring" ]; 
         doHaddock = false;
       });

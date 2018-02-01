@@ -3,7 +3,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-{-# OPTIONS_GHC -O2 -Wall -Werror #-}
+{-# OPTIONS_GHC -O2 -Wall #-}
 
 module Data.ByteString.IsUtf8
   ( isAscii

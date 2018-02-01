@@ -22,6 +22,17 @@ library
   -- hs-source-dirs:      
   default-language:    Haskell2010
 
+test-suite test
+  type: exitcode-stdio-1.0
+  hs-source-dirs: tests
+  main-is: Test.hs
+  build-depends:
+      base
+    , bytestring
+    , is-utf8-bytestring
+    , QuickCheck
+  default-language:    Haskell2010
+
 benchmark microbenchmark
   type: exitcode-stdio-1.0
   build-depends:
