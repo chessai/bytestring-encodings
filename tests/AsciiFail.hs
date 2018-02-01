@@ -4,6 +4,7 @@ module AsciiFail
   ( testIsAsciiFail
   ) where
 
+import Control.Applicative (liftA2)
 import Data.Bits (xor)
 import Data.ByteString.IsUtf8 (isAscii)
 import Data.Word (Word8, Word64)
@@ -14,32 +15,69 @@ import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Internal as BI
 
-sizedByteString :: Range.Size -> Gen B.ByteString
-sizedByteString (Range.Size n) = do
+-- This should generate a 'ByteString' for which isAscii should short-circuit;
+-- i.e. the very first check of a 'Word8' should fail.
+sizedByteString_ShortCircuit :: Range.Size -> Gen B.ByteString
+sizedByteString_ShortCircuit (Range.Size n) = do
   m <- Gen.enum 0 n
-  fmap B.pack $ Gen.list (Range.linear 0 m) (randWord8)
+  fmap B.pack $ Gen.list (Range.constant 0 m) (randWord8)
   where
     randWord8 :: Gen Word8
     randWord8 = fmap (\w -> if w > 127 then w else w `xor` 0xFF) (Gen.word8 Range.constantBounded)
 
-randSuccBS :: Gen B.ByteString
-randSuccBS = do
-  bs <- Gen.sized sizedByteString
+-- a ByteString b for which isAscii b should never fail
+noFailBS :: [Word8]
+noFailBS = [0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F]
+
+-- This makes sure we test past the first 8 bytes by generating a failing bytestring of
+-- length >= 1 and prepending 'noFailBS' to it. 
+sizedByteString :: Range.Size -> Gen B.ByteString
+sizedByteString (Range.Size n) = do
+  m <- Gen.enum 1 n
+  fmap B.pack $ liftA2 (++) (pure noFailBS) (Gen.list (Range.constant 1 (m+1)) randWord8)
+  where
+    randWord8 :: Gen Word8
+    randWord8 = fmap (\w -> if w > 127 then w else w `xor` 0xFF) (Gen.word8 Range.constantBounded)
+ 
+randFailBS_ShortCircuit :: Gen B.ByteString
+randFailBS_ShortCircuit = do
+  bs <- Gen.sized sizedByteString_ShortCircuit 
   n  <- Gen.enum 0 7
   m  <- Gen.enum 0 7
   pure (B.take m $ B.drop n bs) -- to give us some with non-0 offset
+
+randFailBS :: Gen B.ByteString
+randFailBS = do
+  bs <- Gen.sized sizedByteString
+  pure bs 
+  --n  <- Gen.enum 0 7
+  --m  <- Gen.enum 0 7
+  --pure (B.take m $ B.drop n bs) -- to give us some with non-0 offset 
 
 showRawByteString :: B.ByteString -> String
 showRawByteString bs@(BI.PS fptr off len) =
   "Payload: " ++ show (B.unpack bs) ++ ", ptr: " ++ show fptr ++ ", offset: " ++ show off ++ " len: " ++ show len
 
-prop_isAsciiFail :: Property
-prop_isAsciiFail =
+prop_noFail :: Property
+prop_noFail =
   property $ do
-    xs <- forAllWith showRawByteString randSuccBS
+    isAscii (B.pack noFailBS) === True
+
+prop_isAsciiFail_ShortCircuit :: Property
+prop_isAsciiFail_ShortCircuit =
+  property $ do
+    xs <- forAllWith showRawByteString randFailBS_ShortCircuit
     if B.length xs > 0
       then isAscii xs === False
       else isAscii xs === True
+
+prop_isAsciiFail :: Property
+prop_isAsciiFail =
+  property $ do
+    xs <- forAllWith showRawByteString randFailBS
+    if B.length xs > 0
+    then isAscii xs === False
+    else isAscii xs === True
 
 testIsAsciiFail :: IO Bool
 testIsAsciiFail = checkParallel $$(discover) 
