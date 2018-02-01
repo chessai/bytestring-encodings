@@ -1,5 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
@@ -13,10 +12,11 @@ import Data.Bits ( (.&.) )
 import Data.ByteString.Internal (ByteString(..), accursedUnutterablePerformIO)
 import Data.Word (Word8, Word64)
 import GHC.Base
-import GHC.ForeignPtr (ForeignPtr(..))
 import GHC.Ptr
 import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Storable (peek)
+
+import qualified Data.ByteString as B
 
 -- | 1000000010000000100000001000000010000000100000001000000010000000
 m64 :: Word64
@@ -50,6 +50,9 @@ isAsciiW64 !w = w .&. m64 == 0
 isAsciiW8 :: Word8 -> Bool
 isAsciiW8 !w = w .&. m8 == 0
 
+isAsciiSmall :: ByteString -> Bool
+isAsciiSmall !b = B.all (< m8) b
+
 alignPtrPos :: Ptr a -> Ptr a
 alignPtrPos addr@(Ptr a) 
   = case remAddr# a 8# of
@@ -60,30 +63,33 @@ alignPtrNeg :: Ptr a -> Ptr a
 alignPtrNeg addr@(Ptr a)
   = case remAddr# a 8# of
       0# -> addr
-      n  -> Ptr (plusAddr# a (n -# 8#))
+      n  -> Ptr (plusAddr# a (negateInt# n))
 
 isAscii :: ByteString -> Bool
-isAscii (PS _ _ 0)  = True
-isAscii (PS fp@(ForeignPtr addr _) (I# o#) (I# l#)) =
+isAscii   (PS _ _ 0)  = True
+isAscii b@(PS fp (I# o#) len@(I# l#)) =
   accursedUnutterablePerformIO
     $ withForeignPtr fp
-      $ \ptr ->
-        do
-          let
-            startPre, endPre, startPost, endPost :: Ptr Word8
-            startMid, endMid :: Ptr Word64
-            
-            startPre  = Ptr (plusAddr# addr o#)
-            endPre    = alignPtrPos ptr
-            startMid  = endPre `plusPtr` 1
-            endMid    = startPost `plusPtr` (-1)
-            startPost = alignPtrNeg endPost
-            endPost   = Ptr (plusAddr# addr (o# +# l#))
-          
-          startIsAscii <- isAsciiPtrW8  (startPre) (endPre) 
-          if (not startIsAscii) then pure False
+      $ \(Ptr addr) ->
+        if len < 8
+          then pure (isAsciiSmall b)
           else do
-            endIsAscii <- isAsciiPtrW8 (startPost) (endPost)
-            if (not endIsAscii) then pure False
-              else do
-                isAsciiPtrW64 (startMid)  (endMid)
+            let
+              startPre, endPre, startPost, endPost :: Ptr Word8
+              startMid, endMid :: Ptr Word64
+            
+              startPre  = Ptr (plusAddr# addr o#)
+              endPre    = alignPtrPos startPre
+              startMid  = castPtr endPre
+              endMid    = castPtr startPost
+              startPost = alignPtrNeg endPost
+              endPost   = Ptr (plusAddr# addr (o# +# l#))
+          
+            startIsAscii <- isAsciiPtrW8 startPre endPre 
+            if startIsAscii
+              then do
+                endIsAscii <- isAsciiPtrW8 startPost endPost
+                if endIsAscii
+                  then isAsciiPtrW64 startMid endMid
+                  else pure False
+              else pure False
