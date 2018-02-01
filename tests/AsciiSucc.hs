@@ -1,6 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module AsciiSucc where
+module AsciiSucc
+  ( testIsAsciiSucc
+  ) where
 
 import Data.Bits ((.&.))
 import Data.ByteString.IsUtf8 (isAscii)
