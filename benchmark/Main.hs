@@ -1,7 +1,7 @@
 module Main (main) where
 
 import Criterion.Main
-import Data.ByteString.IsUtf8 (isAscii)
+import Data.ByteString.Ascii (isAscii)
 import Data.ByteString (ByteString)
 import qualified Data.List as L
 import qualified Data.ByteString as B

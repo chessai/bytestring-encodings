@@ -2,15 +2,15 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
-{-# OPTIONS_GHC -O2 -Wall #-}
+{-# OPTIONS_GHC -O2 #-}
 
-module Data.ByteString.IsUtf8
+module Data.ByteString.Ascii
   ( isAscii
   ) where
 
 import Data.Bits ( (.&.) )
 import Data.ByteString.Internal (ByteString(..), accursedUnutterablePerformIO)
-import Data.Word (Word8, Word16, Word32, Word64)
+import Data.Word (Word8, Word64)
 import GHC.Base
 import GHC.Ptr
 import Foreign.ForeignPtr (withForeignPtr)
@@ -23,12 +23,12 @@ m64 :: Word64
 m64 = 0x8080808080808080
 
 -- | 10000000100000001000000010000000
-m32 :: Word32
-m32 = 0x80808080
+--m32 :: Word32
+--m32 = 0x80808080
 
 -- | 1000000010000000
-m16 :: Word16
-m16 = 0x8080
+--m16 :: Word16
+--m16 = 0x8080
 
 -- | 10000000
 m8 :: Word8

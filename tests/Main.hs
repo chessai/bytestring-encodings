@@ -1,9 +1,7 @@
 module Main where
 
-import qualified AsciiSucc as Succ
-import qualified AsciiFail as Fail
+import qualified TestAscii as Asc
 
 main :: IO Bool
 main = do
-  Succ.testIsAsciiSucc
-  Fail.testIsAsciiFail
+  Asc.testAscii
