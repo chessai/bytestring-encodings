@@ -32,30 +32,39 @@ isUtf8Ptr !p !q
         else
           if isUtf8b16 c
             then
-              do
-                d <- peek (p `plusPtr` 1)
-                if isUtf8OtherBytes d
-                  then isUtf8Ptr (p `plusPtr` 2) q
-                  else pure False
-            else
-              if isUtf8b24 c
+              if q `minusPtr` p >= 2 
                 then
                   do
                     d <- peek (p `plusPtr` 1)
-                    e <- peek (p `plusPtr` 2)
-                    if (isUtf8OtherBytes d && isUtf8OtherBytes e)
-                      then isUtf8Ptr (p `plusPtr` 3) q
+                    if isUtf8OtherBytes d
+                      then isUtf8Ptr (p `plusPtr` 2) q
                       else pure False
-                else
-                  if isUtf8b32 c
+                else pure False
+            else
+              if isUtf8b24 c
+                then
+                  if q `minusPtr` p >= 3
                     then
                       do
                         d <- peek (p `plusPtr` 1)
                         e <- peek (p `plusPtr` 2)
-                        f <- peek (p `plusPtr` 3)
-                        if (isUtf8OtherBytes d && isUtf8OtherBytes e && isUtf8OtherBytes f)
-                          then isUtf8Ptr (p `plusPtr` 4) q
+                        if (isUtf8OtherBytes d && isUtf8OtherBytes e)
+                          then isUtf8Ptr (p `plusPtr` 3) q
                           else pure False
+                    else pure False 
+                else
+                  if isUtf8b32 c
+                    then
+                      if q `minusPtr` p >= 4
+                        then
+                          do
+                            d <- peek (p `plusPtr` 1)
+                            e <- peek (p `plusPtr` 2)
+                            f <- peek (p `plusPtr` 3)
+                            if (isUtf8OtherBytes d && isUtf8OtherBytes e && isUtf8OtherBytes f)
+                              then isUtf8Ptr (p `plusPtr` 4) q
+                              else pure False
+                        else pure False
                     else pure False
 
 -- Hex:     0x80
