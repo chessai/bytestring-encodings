@@ -16,7 +16,7 @@ import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Internal as BI
 
 -- This should generate a 'ByteString' for which isAscii should short-circuit;
--- i.e. the very first check of a 'Word8' should fail.
+-- i.e. the check of any 'Word8' in the 'ByteString' should fail.
 sizedByteString_ShortCircuit :: Range.Size -> Gen B.ByteString
 sizedByteString_ShortCircuit (Range.Size n) = do
   m <- Gen.enum 0 n
@@ -29,12 +29,14 @@ sizedByteString_ShortCircuit (Range.Size n) = do
 noFailBS :: [Word8]
 noFailBS = [0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F,0x7F]
 
--- This makes sure we test past the first 8 bytes by generating a failing bytestring of
--- length >= 1 and prepending 'noFailBS' to it. 
+-- This makes sure we test past the first 8 bytes, and before the last 8 bytes, by generating a failing 'ByteString' of
+-- length >= 1, then prepending and appending 'noFailBS' to it. 
 sizedByteString :: Range.Size -> Gen B.ByteString
 sizedByteString (Range.Size n) = do
-  m <- Gen.enum 1 n
-  fmap B.pack $ liftA2 (++) (pure noFailBS) (Gen.list (Range.constant 1 (m+1)) randWord8)
+  m <- Gen.enum 1 (n+1)
+  fmap B.pack $
+    liftA2 (++) (pure noFailBS) $ 
+      liftA2 (++) (Gen.list (Range.constant 8 (m+8)) randWord8) (pure noFailBS)
   where
     randWord8 :: Gen Word8
     randWord8 = fmap (\w -> if w > 127 then w else w `xor` 0xFF) (Gen.word8 Range.constantBounded)
@@ -43,16 +45,13 @@ randFailBS_ShortCircuit :: Gen B.ByteString
 randFailBS_ShortCircuit = do
   bs <- Gen.sized sizedByteString_ShortCircuit 
   n  <- Gen.enum 0 7
-  m  <- Gen.enum 0 7
-  pure (B.take m $ B.drop n bs) -- to give us some with non-0 offset
+  pure (B.drop n bs) -- to give us some with non-0 offset
 
 randFailBS :: Gen B.ByteString
 randFailBS = do
   bs <- Gen.sized sizedByteString
-  pure bs 
-  --n  <- Gen.enum 0 7
-  --m  <- Gen.enum 0 7
-  --pure (B.take m $ B.drop n bs) -- to give us some with non-0 offset 
+  n  <- Gen.enum 0 7
+  pure (B.drop n bs) -- to give us some with non-0 offset 
 
 showRawByteString :: B.ByteString -> String
 showRawByteString bs@(BI.PS fptr off len) =

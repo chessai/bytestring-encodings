@@ -26,8 +26,7 @@ randSuccBS :: Gen B.ByteString
 randSuccBS = do
   bs <- Gen.sized sizedByteString
   n  <- Gen.enum 0 7
-  m  <- Gen.enum 0 7
-  pure (B.take m $ B.drop n bs) -- to give us some with non-0 offset
+  pure (B.drop n bs) -- to give us some with non-0 offset
 
 showRawByteString :: B.ByteString -> String
 showRawByteString bs@(BI.PS fptr off len) =
