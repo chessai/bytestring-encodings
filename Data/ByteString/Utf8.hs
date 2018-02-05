@@ -21,51 +21,41 @@ import Foreign.Storable (peek)
 
 import qualified Data.ByteString as B
 
+data Utf8 = U8 | U16 | U24 | U32 | UNot
+  deriving Eq
+
+which :: Word8 -> Utf8
+which c
+  | isUtf8b8  c = U8
+  | isUtf8b16 c = U16
+  | isUtf8b24 c = U24
+  | isUtf8b32 c = U32
+  | otherwise   = UNot
 
 isUtf8Ptr :: Ptr Word8 -> Ptr Word8 -> IO Bool
 isUtf8Ptr !p !q
   | p == q    = pure True
   | otherwise = do
-      c <- peek p 
-      if isUtf8b8 c
-        then isUtf8Ptr (p `plusPtr` 1) q
-        else
-          if isUtf8b16 c
-            then
-              if q `minusPtr` p >= 2 
-                then
-                  do
-                    d <- peek (p `plusPtr` 1)
-                    if isUtf8OtherBytes d
-                      then isUtf8Ptr (p `plusPtr` 2) q
-                      else pure False
-                else pure False
-            else
-              if isUtf8b24 c
-                then
-                  if q `minusPtr` p >= 3
-                    then
-                      do
-                        d <- peek (p `plusPtr` 1)
-                        e <- peek (p `plusPtr` 2)
-                        if (isUtf8OtherBytes d && isUtf8OtherBytes e)
-                          then isUtf8Ptr (p `plusPtr` 3) q
-                          else pure False
-                    else pure False 
-                else
-                  if isUtf8b32 c
-                    then
-                      if q `minusPtr` p >= 4
-                        then
-                          do
-                            d <- peek (p `plusPtr` 1)
-                            e <- peek (p `plusPtr` 2)
-                            f <- peek (p `plusPtr` 3)
-                            if (isUtf8OtherBytes d && isUtf8OtherBytes e && isUtf8OtherBytes f)
-                              then isUtf8Ptr (p `plusPtr` 4) q
-                              else pure False
-                        else pure False
-                    else pure False
+      c <- peek p
+
+      case which c of
+        U8  -> isUtf8Ptr (p `plusPtr` 1) q
+        U16 -> if q `minusPtr` p >= 2
+                 then 
+                   do d <- peek (p `plusPtr` 1)  
+                      if isUtf8OtherBytes d then isUtf8Ptr (p `plusPtr` 2) q else pure False
+                 else pure False
+        U24 -> if q `minusPtr` p >= 3
+                 then
+                   do d <- peek (p `plusPtr` 1); e <- peek (p `plusPtr` 2)
+                      if (isUtf8OtherBytes d && isUtf8OtherBytes e) then isUtf8Ptr (p `plusPtr` 3) q else pure False
+                 else pure False
+        U32 -> if q `minusPtr` p >= 4
+                 then
+                   do d <- peek (p `plusPtr` 1); e <- peek (p `plusPtr` 2); f <- peek (p `plusPtr` 3);
+                      if (isUtf8OtherBytes d && isUtf8OtherBytes e && isUtf8OtherBytes f) then isUtf8Ptr (p `plusPtr` 4) q else pure False
+                 else pure False
+        UNot -> pure False
 
 -- Hex:     0x80
 -- Binary:  10000000
