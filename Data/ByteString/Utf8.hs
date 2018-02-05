@@ -7,7 +7,7 @@
 {-# OPTIONS_GHC -O2 #-}
 
 module Data.ByteString.Utf8
-  ( 
+  ( isUtf8 
   ) where
 
 import Data.Bits ( (.&.) )
