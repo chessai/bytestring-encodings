@@ -1,16 +1,31 @@
-name:                bytestring-encodings
-version:             0.1.0.0
--- synopsis:            
--- description:         
-license:             MIT
-license-file:        LICENSE
-author:              chessai
-maintainer:          chessai1996@gmail.com
--- copyright:           
--- category:            
-build-type:          Simple
-extra-source-files:  ChangeLog.md
-cabal-version:       >=1.10
+name:
+  bytestring-encodings
+version:
+  0.1.0.0
+synopsis:
+  simple, efficient checks to see if a given bytestring adheres to a certain encoding 
+description:
+  'Data.ByteString.X' modules provide an efficient function 'isX :: ByteString -> Bool'
+  which returns 'True' if a given ByteString adheres to a certain encoding X,
+  and 'False' otherwise. 
+license:
+  MIT
+license-file:
+  LICENSE
+author:
+  chessai
+maintainer:
+  chessai1996@gmail.com
+copyright:
+  chessai (c) 2018 
+category:
+  Data 
+build-type:
+  Simple
+extra-source-files:
+  ChangeLog.md
+cabal-version:
+  >=1.10
 
 library
   exposed-modules:
@@ -35,16 +50,16 @@ test-suite test
     , bytestring
     , bytestring-encodings
     , hedgehog 
-    , text 
   default-language:    Haskell2010
 
 benchmark microbenchmark
   type: exitcode-stdio-1.0
   build-depends:
       base
+    , bytestring 
     , bytestring-encodings
     , gauge
-    , bytestring
+    , text
   ghc-options: -Wall -Werror -O2
   default-language: Haskell2010
   hs-source-dirs: benchmark

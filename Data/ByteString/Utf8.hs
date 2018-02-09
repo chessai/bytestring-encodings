@@ -8,6 +8,7 @@
 
 module Data.ByteString.Utf8
   ( isUtf8 
+  , isUtf8' 
   ) where
 
 import Data.Bits ( (.&.) )
@@ -86,9 +87,32 @@ isUtf8b32 !w = w .&. 0xF8 == 0xF0
 isUtf8OtherBytes :: Word8 -> Bool
 isUtf8OtherBytes !w = w .&. 0xC0 == 0x80
 
+-- | 'isUtf8' firsts calls the very fast 'Data.ByteString.Ascii.isAscii' to see if
+--    the data is ASCII (and thus UTF-8). Use this if you know most of your
+--    data is ASCII-encoded.
+--    If you know that most of your data is probably not UTF8-encoded, it is probably
+--    best to use 'isUtf8'' to avoid this check.
 isUtf8 :: ByteString -> Bool
 isUtf8   (PS _ _ 0) = True
 isUtf8 b@(PS fp (I# o#) (I# l#)) = if isAscii b then True else
+  accursedUnutterablePerformIO
+    $ withForeignPtr fp
+      $ \(Ptr addr) ->
+        do
+          let
+            start, end :: Ptr Word8
+            start = Ptr (plusAddr# addr o#)
+            end   = Ptr (plusAddr# addr (o# +# l#))
+            
+          isUtf8Ptr start end
+
+-- | 'isUtf8'' does not call 'Data.ByteString.Ascii.isAscii. Use this if
+--   you know most of your data is not ASCII-encoded.
+--   If you know that most of your data is probably ASCII-encoded, it is
+--   probably best to use 'isUtf8'.
+isUtf8' :: ByteString -> Bool
+isUtf8'   (PS _ _ 0) = True
+isUtf8' b@(PS fp (I# o#) (I# l#)) =
   accursedUnutterablePerformIO
     $ withForeignPtr fp
       $ \(Ptr addr) ->

@@ -7,17 +7,16 @@ module Utf8
   ( testUtf8
   ) where
 
+{-# OPTIONS_GHC -Wall #-}
+
 import Control.Applicative (liftA2)
 import Control.Monad (join, sequence)
 import Data.Bits ((.&.), xor)
 import Data.ByteString.Utf8 (isUtf8)
 import Data.Char (chr)
 import Data.Foldable (foldl')
-import Data.Text (Text)
 import Data.Word (Word8)
 import Hedgehog
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as TE
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import qualified Data.ByteString as B
