@@ -28,7 +28,8 @@ test-suite test
   hs-source-dirs: tests
   main-is: Main.hs
   other-modules:
-      TestAscii
+      Ascii
+      Utf8 
   build-depends:
       base
     , bytestring

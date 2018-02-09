@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module TestAscii 
+module Ascii 
   ( testAscii
   ) where
 

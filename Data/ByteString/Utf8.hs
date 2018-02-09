@@ -39,7 +39,7 @@ isUtf8Ptr !p !q
       c <- peek p
 
       case which c of
-        U8  -> isUtf8Ptr (p `plusPtr` 1) q
+        U8  -> isUtf8Ptr (p `plusPtr` 1) q 
         U16 -> if q `minusPtr` p >= 2
                  then 
                    do d <- peek (p `plusPtr` 1)  

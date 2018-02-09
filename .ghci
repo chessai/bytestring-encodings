@@ -1,1 +1,9 @@
+import Control.Monad (replicateM_)
+import Data.Bits
+import Data.ByteString
+import Data.Text (Text)
+import Data.Text.Encoding
+:set -XBinaryLiterals
 :set -XOverloadedStrings
+
+:set prompt "> "
