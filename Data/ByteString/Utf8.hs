@@ -19,8 +19,6 @@ import GHC.Ptr
 import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Storable (peek)
 
-import qualified Data.ByteString as B
-
 data Utf8 = U8 | U16 | U24 | U32 | UNot
   deriving Eq
 
@@ -90,7 +88,7 @@ isUtf8OtherBytes !w = w .&. 0xC0 == 0x80
 
 isUtf8 :: ByteString -> Bool
 isUtf8   (PS _ _ 0) = True
-isUtf8 b@(PS fp (I# o#) len@(I# l#)) = if isAscii b then True else
+isUtf8 b@(PS fp (I# o#) (I# l#)) = if isAscii b then True else
   accursedUnutterablePerformIO
     $ withForeignPtr fp
       $ \(Ptr addr) ->

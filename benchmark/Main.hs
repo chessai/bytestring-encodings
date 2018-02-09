@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Criterion.Main
+import Gauge.Main
 import Data.ByteString.Ascii (isAscii)
 import Data.ByteString (ByteString)
 import qualified Data.List as L
