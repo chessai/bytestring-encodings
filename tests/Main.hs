@@ -1,7 +1,9 @@
 module Main where
 
-import qualified TestAscii as Asc
+import qualified Ascii as Asc
+import qualified Utf8  as Utf8
 
 main :: IO Bool
-main = do
+main = do 
   Asc.testAscii
+  Utf8.testUtf8
