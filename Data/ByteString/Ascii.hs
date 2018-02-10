@@ -67,6 +67,7 @@ alignPtrNeg addr@(Ptr a)
       0# -> addr
       n  -> Ptr (plusAddr# a (negateInt# n))
 
+-- | 'isAscii' can tell if a given 'ByteString' is ASCII-encoded.
 isAscii :: ByteString -> Bool
 isAscii   (PS _ _ 0)  = True
 isAscii b@(PS fp (I# o#) len@(I# l#)) =
