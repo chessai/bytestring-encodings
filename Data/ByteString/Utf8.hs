@@ -111,8 +111,8 @@ isUtf8 b@(PS fp (I# o#) (I# l#)) = if isAscii b then True else
 --   If you know that most of your data is probably ASCII-encoded, it is
 --   probably best to use 'isUtf8'.
 isUtf8' :: ByteString -> Bool
-isUtf8'   (PS _ _ 0) = True
-isUtf8' b@(PS fp (I# o#) (I# l#)) =
+isUtf8' (PS _ _ 0) = True
+isUtf8' (PS fp (I# o#) (I# l#)) =
   accursedUnutterablePerformIO
     $ withForeignPtr fp
       $ \(Ptr addr) ->
