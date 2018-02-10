@@ -18,16 +18,17 @@ main = do
         ]))
 
   defaultMain
-    [ bgroup "ascii"
+    [ 
+      bgroup "ASCII: naive versus isAscii"
       [ bench "Data.ByteString.all" $ whnf standardIsAscii bs
       , bench "isAscii" $ whnf isAscii bs
       ]
-    , bgroup "utf8-ascii" 
+    , bgroup "ASCII: Data.Text.Encoding.decodeUtf8 versus isUtf8" 
       [ bench "Data.Text.Encoding.decodeUtf8" $ whnf TE.decodeUtf8 bsAscii
       , bench "isUtf8" $ whnf isUtf8 bsAscii
       ]
-    , bgroup "utf8-utf8"
-      [ --bench "Data.Text.Encoding.decodeUtf8" $ whnf TE.decodeUtf8 bsUtf8
+    , bgroup "UTF-8: isUtf8"
+      [ 
         bench "isUtf8" $ whnf isUtf8 bsUtf8 
       ]
     ]
