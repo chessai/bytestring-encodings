@@ -28,13 +28,17 @@ let
          };
 
     {
-      mkDerivation = args: super.mkDerivation (args // {
-        doBenchmark = pkgs.lib.elem args.pname [ "bytestring-encodings" ]; 
-        doCheck = pkgs.lib.elem args.pname [ "bytestring-encodings" ]; 
+      #mkDerivation = args: super.mkDerivation (args // {
+        #doBenchmark = pkgs.lib.elem args.pname [ "bytestring-encodings" ]; 
+        #doCheck = pkgs.lib.elem args.pname [ "bytestring-encodings" ]; 
+        #doHaddock = false;
+      #});
+      
+      bytestring-encodings = overrideCabal (build "bytestring-encodings" ./.) (drv: {
+        doBenchmark = true;
+        doCheck = true;
         doHaddock = false;
       });
-      
-      bytestring-encodings = build "bytestring-encodings" ./.;
     };
   };
 in rec {
