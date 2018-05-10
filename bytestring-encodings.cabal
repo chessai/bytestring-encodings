@@ -31,22 +31,16 @@ source-repository head
   type:     git
   location: https://github.com/chessai/bytestring-encodings
 
-flag dev-wall-werror
-  description: turn on -Wall -Werror for development purposes
-  manual: True
-  default: False
-
 library
   exposed-modules:
-      Data.ByteString.Ascii
-    , Data.ByteString.Utf8 
+      Data.ByteString.Encodings
+    , Data.ByteString.Internal.Ascii
+    , Data.ByteString.Internal.Utf8 
   build-depends:
-      base >=4.10 && <5.0
+      base >= 4.7 && <5.0
     , bytestring 
     , ghc-prim 
   default-language:    Haskell2010
-  if flag(dev-wall-werror)
-    ghc-options: -Wall -Werror
 
 test-suite test
   type: exitcode-stdio-1.0
