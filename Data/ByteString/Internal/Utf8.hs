@@ -10,8 +10,8 @@ module Data.ByteString.Internal.Utf8
   ) where
 
 import Data.Bits ((.&.))
-import Data.ByteString.Ascii (isAscii)
 import Data.ByteString.Internal (ByteString(..), accursedUnutterablePerformIO)
+import Data.ByteString.Internal.Ascii (isAscii)
 import Data.Word (Word8)
 import GHC.Base
 import GHC.Ptr

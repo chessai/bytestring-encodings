@@ -1,13 +1,13 @@
 name:
   bytestring-encodings
 version:
-  0.1.0.1
+  0.2.0.1
 synopsis:
   checks to see if a given bytestring adheres to a certain encoding 
 description:
-  'Data.ByteString.X' modules provide simple, efficient function 'isX :: ByteString -> Bool'
-  which returns 'True' if a given ByteString adheres to a certain encoding X,
-  and 'False' otherwise. 
+  This module provides a family of functions, 'isX', of type @'ByteString' -> 'Bool'@,
+  which return 'True' if the input ByteString adheres to a certain encoding X,
+  and 'False' otherwise.
 license:
   MIT
 license-file:
