@@ -1,13 +1,19 @@
+--------------------------------------------------------------------------------
+
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 {-# OPTIONS_GHC -O2 #-}
 
+--------------------------------------------------------------------------------
+
 module Data.ByteString.Internal.Utf8
   ( isUtf8 
   , isUtf8' 
   ) where
+
+--------------------------------------------------------------------------------
 
 import Data.Bits ((.&.))
 import Data.ByteString.Internal (ByteString(..), accursedUnutterablePerformIO)
@@ -18,8 +24,10 @@ import GHC.Ptr
 import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Storable (peek)
 
+--------------------------------------------------------------------------------
+
 data Utf8 = U8 | U16 | U24 | U32 | UNot
-  deriving Eq
+--  deriving Eq
 
 which :: Word8 -> Utf8
 {-# inline which #-}
@@ -29,6 +37,8 @@ which !c
   | isUtf8b24 c = U24
   | isUtf8b32 c = U32
   | otherwise   = UNot
+
+--------------------------------------------------------------------------------
 
 isUtf8Ptr :: Ptr Word8 -> Ptr Word8 -> IO Bool
 isUtf8Ptr !p !q
@@ -54,6 +64,8 @@ isUtf8Ptr !p !q
                       if (isUtf8OtherBytes d && isUtf8OtherBytes e && isUtf8OtherBytes f) then isUtf8Ptr (p `plusPtr` 4) q else pure False
                  else pure False
         UNot -> pure False
+
+--------------------------------------------------------------------------------
 
 -- Hex:     0x80
 -- Binary:  10000000
@@ -91,6 +103,8 @@ isUtf8OtherBytes :: Word8 -> Bool
 {-# inline isUtf8OtherBytes #-}
 isUtf8OtherBytes !w = w .&. 0xC0 == 0x80
 
+--------------------------------------------------------------------------------
+
 -- | 'isUtf8' firsts calls the very fast 'isAscii' to see if
 --    the data is ASCII (and thus UTF-8). Use this if you know most of your
 --    data is ASCII-encoded.
@@ -98,17 +112,20 @@ isUtf8OtherBytes !w = w .&. 0xC0 == 0x80
 --    best to use 'isUtf8'' to avoid this check.
 isUtf8 :: ByteString -> Bool
 isUtf8   (PS _ _ 0) = True
-isUtf8 b@(PS fp (I# o#) (I# l#)) = if isAscii b then True else
-  accursedUnutterablePerformIO
-    $ withForeignPtr fp
-      $ \(Ptr addr) ->
-        do
-          let
-            start, end :: Ptr Word8
-            start = Ptr (plusAddr# addr o#)
-            end   = Ptr (plusAddr# addr (o# +# l#))
+isUtf8 b = -- @(PS fp (I# o#) (I# l#)) =
+  if isAscii b
+  then True
+  else isUtf8' b
+  --accursedUnutterablePerformIO
+  --  $ withForeignPtr fp
+  --    $ \(Ptr addr) ->
+  --      do
+  --        let
+  --          start, end :: Ptr Word8
+  --          start = Ptr (plusAddr# addr o#)
+  --          end   = Ptr (plusAddr# addr (o# +# l#))
             
-          isUtf8Ptr start end
+   --       isUtf8Ptr start end
 {-# inline isUtf8 #-}
 
 -- | 'isUtf8'' does not call 'isAscii'. Use this if
@@ -129,3 +146,5 @@ isUtf8' (PS fp (I# o#) (I# l#)) =
             
           isUtf8Ptr start end
 {-# inline isUtf8' #-}
+
+--------------------------------------------------------------------------------

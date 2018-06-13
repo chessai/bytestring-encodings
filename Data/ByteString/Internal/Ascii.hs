@@ -1,12 +1,18 @@
+--------------------------------------------------------------------------------
+
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 
 {-# OPTIONS_GHC -O2 #-}
 
+--------------------------------------------------------------------------------
+
 module Data.ByteString.Internal.Ascii
   ( isAscii
   ) where
+
+--------------------------------------------------------------------------------
 
 import Data.Bits ((.&.))
 import Data.ByteString.Internal (ByteString(..), accursedUnutterablePerformIO)
@@ -17,6 +23,8 @@ import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Storable (peek)
 
 import qualified Data.ByteString as B
+
+--------------------------------------------------------------------------------
 
 -- | Binary:  1000000010000000100000001000000010000000100000001000000010000000
 --   Decimal: 9259542123273814144
@@ -29,6 +37,8 @@ m64 = 0x8080808080808080
 m8 :: Word8
 {-# inline m8 #-}
 m8 = 0x80
+
+--------------------------------------------------------------------------------
 
 isAsciiPtrW64 :: Ptr Word64 -> Ptr Word64 -> IO Bool
 isAsciiPtrW64 !p !q
@@ -48,6 +58,8 @@ isAsciiPtrW8 !p !q
         then isAsciiPtrW8 (p `plusPtr` 1) q
         else pure False
 
+--------------------------------------------------------------------------------
+
 isAsciiW64 :: Word64 -> Bool
 {-# inline isAsciiW64 #-}
 isAsciiW64 !w = w .&. m64 == 0
@@ -59,6 +71,8 @@ isAsciiW8 !w = w .&. m8 == 0
 isAsciiSmall :: ByteString -> Bool
 {-# inline isAsciiSmall #-}
 isAsciiSmall !b = B.all (< m8) b
+
+--------------------------------------------------------------------------------
 
 alignPtrPos :: Ptr a -> Ptr a
 {-# inline alignPtrPos #-}
@@ -73,6 +87,8 @@ alignPtrNeg addr@(Ptr a)
   = case remAddr# a 8# of
       0# -> addr
       n  -> Ptr (plusAddr# a (negateInt# n))
+
+--------------------------------------------------------------------------------
 
 -- | 'isAscii' can tell if a given 'ByteString' is ASCII-encoded.
 isAscii :: ByteString -> Bool
@@ -104,3 +120,5 @@ isAscii b@(PS fp (I# o#) len@(I# l#)) =
                   then isAsciiPtrW64 startMid endMid
                   else pure False
               else pure False
+
+--------------------------------------------------------------------------------
