@@ -90,7 +90,8 @@ alignPtrNeg addr@(Ptr a)
 
 --------------------------------------------------------------------------------
 
--- | 'isAscii' can tell if a given 'ByteString' is ASCII-encoded.
+-- | /O(n\/8)/ detremine if a 'ByteString' is
+--   ASCII-encoded.
 isAscii :: ByteString -> Bool
 {-# inline isAscii #-}
 isAscii   (PS _ _ 0)  = True

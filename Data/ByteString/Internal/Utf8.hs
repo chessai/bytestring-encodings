@@ -112,20 +112,10 @@ isUtf8OtherBytes !w = w .&. 0xC0 == 0x80
 --    best to use 'isUtf8'' to avoid this check.
 isUtf8 :: ByteString -> Bool
 isUtf8   (PS _ _ 0) = True
-isUtf8 b = -- @(PS fp (I# o#) (I# l#)) =
+isUtf8 b =
   if isAscii b
   then True
   else isUtf8' b
-  --accursedUnutterablePerformIO
-  --  $ withForeignPtr fp
-  --    $ \(Ptr addr) ->
-  --      do
-  --        let
-  --          start, end :: Ptr Word8
-  --          start = Ptr (plusAddr# addr o#)
-  --          end   = Ptr (plusAddr# addr (o# +# l#))
-            
-   --       isUtf8Ptr start end
 {-# inline isUtf8 #-}
 
 -- | 'isUtf8'' does not call 'isAscii'. Use this if

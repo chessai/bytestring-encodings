@@ -9,8 +9,8 @@
 --------------------------------------------------------------------------------
 
 module Data.ByteString.Internal.Utf16
-  ( isUtf16LE
-  , isUtf16BE
+  ( isUtf16BE
+  , isUtf16LE
   ) where
 
 --------------------------------------------------------------------------------
@@ -28,8 +28,6 @@ import qualified Data.ByteString.Unsafe as B
 
 --------------------------------------------------------------------------------
 
---------------------------------------------------------------------------------
-
 validate1 :: Word16 -> Bool
 validate1 x1 = (x1 >= 0 && x1 < 0xD800) || x1 > 0xDFFF
 {-# INLINE validate1 #-}
@@ -41,25 +39,13 @@ validate2 x1 x2 = x1 >= 0xD800 && x1 <= 0xDBFF &&
 
 --------------------------------------------------------------------------------
 
-isUtf16LE :: ByteString -> Bool
-isUtf16LE (PS _ _ 0) = True
-isUtf16LE bs@(PS _ _ len) = go 0
-  where
-    go !i
-      | i >= len                       = True
-      | i + 1 < len && validate1 x1    = go (i + 2)
-      | i + 3 < len && validate2 x1 x2 = go (i + 4)
-      | otherwise = False
-      where
-        x1  = idx i       + (idx (i + 1) `shiftL` 8)
-        x2  = idx (i + 2) + (idx (i + 3) `shiftL` 8)
-        idx = fromIntegral . B.unsafeIndex bs :: Int -> Word16
-{-# INLINE [0] isUtf16LE #-}
-
+-- | /O(n)/ determine if a 'ByteString' is big endian
+--   UTF-16 encoded.
 isUtf16BE :: ByteString -> Bool
 isUtf16BE (PS _ _ 0) = True
 isUtf16BE bs@(PS _ _ len) = go 0
   where
+    {-# INLINE go #-}
     go !i
       | i >= len                       = True
       | i + 1 < len && validate1 x1    = go (i + 2)
@@ -69,6 +55,24 @@ isUtf16BE bs@(PS _ _ len) = go 0
         x1  = (idx i `shiftL` 8)       + idx (i + 1)
         x2  = (idx (i + 2) `shiftL` 8) + idx (i + 3)
         idx = fromIntegral . B.unsafeIndex bs :: Int -> Word16
-{-# INLINE [0] isUtf16BE #-}
+{-# INLINE isUtf16BE #-}
+
+-- | /O(n)/ determine if a 'ByteString' is little endian
+--   UTF-16 encoded.
+isUtf16LE :: ByteString -> Bool
+isUtf16LE (PS _ _ 0) = True
+isUtf16LE bs@(PS _ _ len) = go 0
+  where
+    {-# INLINE go #-}
+    go !i
+      | i >= len                       = True
+      | i + 1 < len && validate1 x1    = go (i + 2)
+      | i + 3 < len && validate2 x1 x2 = go (i + 4)
+      | otherwise = False
+      where
+        x1  = idx i       + (idx (i + 1) `shiftL` 8)
+        x2  = idx (i + 2) + (idx (i + 3) `shiftL` 8)
+        idx = fromIntegral . B.unsafeIndex bs :: Int -> Word16
+{-# INLINE isUtf16LE #-}
 
 --------------------------------------------------------------------------------
