@@ -36,8 +36,6 @@ library
       Data.ByteString.Encodings
     , Data.ByteString.Internal.Ascii
     , Data.ByteString.Internal.Utf8 
-    , Data.ByteString.Internal.Utf16
-    , Data.ByteString.Internal.Utf32
   build-depends:
       base >= 4.7 && <5.0
     , bytestring 

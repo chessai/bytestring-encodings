@@ -6,7 +6,7 @@ module Ascii
 
 import Control.Applicative (liftA2)
 import Data.Bits ((.&.), xor)
-import Data.ByteString.Ascii (isAscii)
+import Data.ByteString.Encodings (isAscii)
 import Data.Word (Word8, Word64)
 import Hedgehog
 import qualified Hedgehog.Gen as Gen

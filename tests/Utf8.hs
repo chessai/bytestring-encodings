@@ -12,7 +12,7 @@ module Utf8
 import Control.Applicative (liftA2)
 import Control.Monad (join, sequence)
 import Data.Bits ((.&.), xor)
-import Data.ByteString.Utf8 (isUtf8)
+import Data.ByteString.Encodings (isUtf8)
 import Data.Char (chr)
 import Data.Foldable (foldl')
 import Data.Word (Word8)
