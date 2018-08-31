@@ -1,7 +1,7 @@
 name:
   bytestring-encodings
 version:
-  0.2.0.1
+  0.2.0.2
 synopsis:
   checks to see if a given bytestring adheres to a certain encoding 
 description:

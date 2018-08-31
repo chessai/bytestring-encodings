@@ -1,8 +1,7 @@
 module Main (main) where
 
 import Gauge.Main
-import Data.ByteString.Ascii (isAscii)
-import Data.ByteString.Utf8  (isUtf8)
+import Data.ByteString.Encodings (isAscii, isUtf8)
 import Data.ByteString (ByteString)
 import qualified Data.List as L
 import qualified Data.ByteString as B
@@ -34,4 +33,4 @@ main = do
     ]
 
 standardIsAscii :: ByteString -> Bool
-standardIsAscii bs = B.all (\x -> x < 127) bs
+standardIsAscii bs = B.all (\x -> x < 128) bs
