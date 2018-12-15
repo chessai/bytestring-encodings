@@ -90,8 +90,10 @@ alignPtrNeg addr@(Ptr a)
 
 --------------------------------------------------------------------------------
 
--- | /O(n\/8)/ detremine if a 'ByteString' is
+-- | /O(n)/ determine if a 'ByteString' is
 --   ASCII-encoded.
+--   This function should be 8x faster than
+--   @'Data.ByteString.all' ('<' 128)@.
 isAscii :: ByteString -> Bool
 {-# inline isAscii #-}
 isAscii   (PS _ _ 0)  = True
